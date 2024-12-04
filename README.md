@@ -12,7 +12,12 @@
   <a href="">Blog</a> 
   | <a href="https://github.com/BerensRWU/DenseMap">Original Github Page</a>
   </h3>
-  <div align="center"></div>
+  <div align="center">
+  The function gets the projected LiDAR point cloud, the size of the camera image and the grid size. 
+  A grid size of 4 means a 9x9 neighbourhood is used and weighted depth information is calculated according to the distance of the neighbourhood.
+  </div>
+
+
 
 <!-- 
 ~~~

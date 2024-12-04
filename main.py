@@ -3,6 +3,8 @@ import os
 import matplotlib.pyplot as plt
 import cv2
 from depth_map import dense_map
+import glob
+import tqdm
 
 # Class for the calibration matrices for KITTI data
 class Calibration:
@@ -53,16 +55,36 @@ class Calibration:
         return points_2d[mask,0:2], mask
 
 if __name__ == "__main__":
-    root = "data/"
-    image_dir = os.path.join(root, "image_2")
-    velodyne_dir = os.path.join(root, "velodyne")
+    root = "/media/lfl-data2/VECtor_h5/school_dolly1/" #数据的根目录
+    image_dir = os.path.join(root, "school_dolly1.synced.left_camera") #图像的目录
+    velodyne_dir = os.path.join(root, "school_dolly1.synced.lidar") #LiDAR的目录
     calib_dir = os.path.join(root, "calib")
     # Data id
     cur_id = 21
     # Loading the image
-    img = cv2.imread(os.path.join(image_dir, "%06d.png" % cur_id))
+    # img = cv2.imread(os.path.join(image_dir, "%06d.png" % cur_id))
+    imgin_list = sorted(glob.glob(os.path.join(image_dir, "*.png")))#获取所有的png文件
+    # imgin_list，stride=3
+    stride=3
+    imgin_list=imgin_list[::stride]
+
+
     # Loading the LiDAR data
-    lidar = np.fromfile(os.path.join(velodyne_dir, "%06d.bin" % cur_id), dtype=np.float32).reshape(-1, 4)
+    lidarin_list = sorted(glob.glob(os.path.join(velodyne_dir, "*.pcd")))#获取所有的pcd文件
+    # lidar = np.fromfile(os.path.join(velodyne_dir, "%06d.bin" % cur_id), dtype=np.float32).reshape(-1, 4)
+
+    num_imgs = len(imgin_list)
+    assert len(lidarin_list) == num_imgs
+
+    # 一张一张的读图像并且处理
+    pbar = tqdm.tqdm(total=num_imgs-1)
+    for i in range(num_imgs):
+        img = cv2.imread(imgin_list[i])
+
+        lidar = np.fromfile(os.path.join(lidarin_list[i]), dtype=np.float32).reshape(-1, 4)
+
+        gwp_debug=666;
+
     # Loading Calibration
     calib = Calibration(os.path.join(calib_dir, "%06d.txt" % cur_id))
     # From LiDAR coordinate system to Camera Coordinate system
