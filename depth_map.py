@@ -4,8 +4,8 @@ import numpy as np
 def dense_map(Pts, n, m, grid):
     ng = 2 * grid + 1
     
-    mX = np.zeros((m,n)) + np.float("inf")
-    mY = np.zeros((m,n)) + np.float("inf")
+    mX = np.zeros((m,n)) + np.float64("inf")
+    mY = np.zeros((m,n)) + np.float64("inf")
     mD = np.zeros((m,n))
     mX[np.int32(Pts[1]),np.int32(Pts[0])] = Pts[0] - np.round(Pts[0])
     mY[np.int32(Pts[1]),np.int32(Pts[0])] = Pts[1] - np.round(Pts[1])
