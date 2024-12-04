@@ -71,7 +71,7 @@ class Calibration:
         points_2d[:,1] /= points_2d[:,2]
         
         mask = (points_2d[:,0] >= 0) & (points_2d[:,0] <= img_width) & (points_2d[:,1] >= 0) & (points_2d[:,1] <= img_height)
-        mask = mask & (rect_pts[:,2] > 2)
+        # mask = mask & (rect_pts[:,2] > 2)
         return points_2d[mask,0:2], mask
 
 if __name__ == "__main__":
