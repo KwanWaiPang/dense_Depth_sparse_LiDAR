@@ -9,22 +9,12 @@ import tqdm
 # Class for the calibration matrices for KITTI data
 class Calibration:
     def __init__(self, calib_filepath):
-        # calibs = self.read_calib_file(calib_filepath)
-
-        # self.P = calibs['P2']
-        # self.P = np.reshape(self.P, [3,4])
-
-        # self.L2C = calibs['Tr_velo_to_cam']
-        # self.L2C = np.reshape(self.L2C, [3,4])
-
-        # self.R0 = calibs['R0_rect']
-        # self.R0 = np.reshape(self.R0,[3,3])
 
         # From Camera Coordinate system to Image frame (/media/lfl-data2/VECtor_h5/0_calib/left_regular_camera_intrinsic_results.yaml)
         self.P=np.array(
-                    [886.19107,    0.       ,  610.57891,    0.     ,
-                     0.       ,    886.59163,  514.59271,    0.     ,
-                     0.     ,      0.       ,  1.       ,    0.      ]).reshape([3,4])
+                    [737.85626,    0.     ,  609.6249 ,    0.     ,
+                     0.     ,  784.1731 ,  515.77673,    0.     ,
+                     0.     ,    0.     ,    1.     ,    0.     ]).reshape([3,4])
         
         # From Camera Coordinate system to Image frame
         # self.R0=np.array(
@@ -66,8 +56,8 @@ class Calibration:
         n = pts_3d_lidar.shape[0] # Number of points,(n,3)
         pts_3d_hom = np.hstack((pts_3d_lidar, np.ones((n,1)))) #转换为齐次坐标(n,3)->(n,4)
         pts_3d_cam_ref = np.dot(pts_3d_hom, np.transpose(self.L2C))#(n,4)*(4,3)->(n,3)，转换到相机坐标系
-        pts_3d_cam_rec = np.transpose(np.dot(self.R0, np.transpose(pts_3d_cam_ref))) #转换到图像坐标系
-        # pts_3d_cam_rec=pts_3d_cam_ref
+        # pts_3d_cam_rec = np.transpose(np.dot(self.R0, np.transpose(pts_3d_cam_ref))) #转换到图像坐标系
+        pts_3d_cam_rec=pts_3d_cam_ref
         return pts_3d_cam_rec
     
     # From Camera Coordinate system to Image frame
