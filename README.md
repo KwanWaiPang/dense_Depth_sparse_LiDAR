@@ -17,6 +17,7 @@
   A grid size of 4 means a 9x9 neighbourhood is used and weighted depth information is calculated according to the distance of the neighbourhood.
   </div>
 
+<br>
 
 <div align="center">
   <img src="./color_dense_depth/微信截图_20241205135714.png" width="80%" />
