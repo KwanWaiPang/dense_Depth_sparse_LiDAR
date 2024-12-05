@@ -5,14 +5,14 @@ import cv2
 from depth_map import dense_map
 import glob
 import tqdm
-import open3d as o3d
+import open3d as o3d #pip install open3d
 from scipy.interpolate import griddata
 
 
 # Class for the calibration matrices for KITTI data
 class Calibration:
     def __init__(self):
-        # From Camera Coordinate system to Image frame. Intrinsic
+        # From Camera Coordinate system to Image frame. Intrinsic (used the projection_matrix)
         self.P = np.array([ 737.85626,    0.     ,  609.6249 ,    0.     ,
                               0.     ,  784.1731 ,  515.77673,    0.     ,
                               0.     ,    0.     ,    1.     ,    0.     ]).reshape([3,4])
@@ -56,18 +56,42 @@ def plt_save(depth_img, save_path):
 
 if __name__ == "__main__":
 
-    imgin_list = ["corridors_dolly1_0.png"]
-    lidarin_list = ["corridors_dolly1_0.pcd"]
+    root = "/media/lfl-data2/VECtor_h5/school_dolly1/" #数据的根目录
+    image_dir = os.path.join(root, "school_dolly1.synced.left_camera") #图像的目录
+    velodyne_dir = os.path.join(root, "school_dolly1.synced.lidar") #LiDAR的目录
+    imgdirout = os.path.join(root, f"lidar_dense_depth")
+    if not os.path.exists(imgdirout):
+        os.makedirs(imgdirout)
+    else:
+        print("The folder already exists")
+        os.system(f"rm -rf {imgdirout}")
+        os.makedirs(imgdirout)
+    
+    # Loading the image
+    # img = cv2.imread(os.path.join(image_dir, "%06d.png" % cur_id))
+    imgin_list = sorted(glob.glob(os.path.join(image_dir, "*.png")))#获取所有的png文件
+    # imgin_list，stride=3
+    
+    # stride=3
+    # imgin_list=imgin_list[::stride]
 
-    num_imgs = len(imgin_list)
-    assert len(lidarin_list) == num_imgs
+    # Loading the LiDAR data
+    lidarin_list = sorted(glob.glob(os.path.join(velodyne_dir, "*.pcd")))#获取所有的pcd文件
+    # lidar = np.fromfile(os.path.join(velodyne_dir, "%06d.bin" % cur_id), dtype=np.float32).reshape(-1, 4)
+
+    num_imgs = len(lidarin_list)
+    # assert len(lidarin_list) == num_imgs
 
     pbar = tqdm.tqdm(total=num_imgs-1)
     for i in range(num_imgs):
-        image = cv2.imread(imgin_list[i])
+        # image = cv2.imread(imgin_list[i])
+        image = cv2.imread(imgin_list[0]) #由于此处图像仅仅是提供长和宽的作用，为此只取第一张即可~
 
         # lidar = np.fromfile(os.path.join(lidarin_list[i]), dtype=np.float32).reshape(-1, 4)
         lidar = np.asarray(o3d.io.read_point_cloud(lidarin_list[i]).points)
+        filename = os.path.basename(lidarin_list[i])  # 获取文件名，包括扩展名
+        basename, extension = os.path.splitext(filename)  # 分离文件名和扩展名
+        lidar_depth_name=basename
 
         # Loading Calibration
         calib = Calibration()
@@ -85,7 +109,7 @@ if __name__ == "__main__":
         ds = lidar_rect[mask,2]
 
         # Generate the depth map from nx3 points
-        depth_max = 10
+        depth_max = 10 #设置最远为10米
         depth_scale = 1000
         
         ### 1. simple project
@@ -110,24 +134,27 @@ if __name__ == "__main__":
         # points for dense map
         xs2, ys2 = lidarOnImage[:,0], lidarOnImage[:,1]
         pts = np.stack((xs2, ys2, ds), axis=1)
-        grid_size = 10
+        grid_size = 10 #起码要设置为10才是稠密的~
         dense_depth_map = dense_map(pts.T, image.shape[1], image.shape[0], grid_size)
         dense_depth_map[dense_depth_map > depth_max] = depth_max
         
-        fig, axs = plt.subplots(2, 2)
-        axs[0, 0].imshow(image)
-        axs[0, 1].imshow(depth_map)
-        axs[1, 0].imshow(depth_map_grid)
-        axs[1, 1].imshow(dense_depth_map)
-        plt.show()
+        # fig, axs = plt.subplots(2, 2)
+        # axs[0, 0].imshow(image)
+        # axs[0, 1].imshow(depth_map)
+        # axs[1, 0].imshow(depth_map_grid)
+        # axs[1, 1].imshow(dense_depth_map)
+        # plt.show()
         
         # rescale the depth map to save. 16UC1 format
         depth_map = depth_map * depth_scale
         dense_depth_map = dense_depth_map * depth_scale
-        cv2.imwrite("depth_map.png", depth_map.astype(np.uint16))
-        plt_save(depth_map, "depth_map_vis.png")
-        cv2.imwrite(f"dense_depth_map_grid{grid_size}.png", dense_depth_map.astype(np.uint16))
-        plt_save(dense_depth_map, f"dense_depth_map_vis_grid{grid_size}.png")
+
+        cv2.imwrite(os.path.join(imgdirout, f"{lidar_depth_name}.png"), dense_depth_map.astype(np.uint16))
+
+        # cv2.imwrite("depth_map.png", depth_map.astype(np.uint16))
+        # plt_save(depth_map, "depth_map_vis.png")
+        # cv2.imwrite(f"dense_depth_map_grid{grid_size}.png", dense_depth_map.astype(np.uint16))
+        plt_save(dense_depth_map, f"color_dense_depth/dense_depth_map_{lidar_depth_name}.png") #保存深度图(彩色)
         
         pbar.update(1)
 

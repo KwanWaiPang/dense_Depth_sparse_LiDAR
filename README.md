@@ -9,7 +9,7 @@
 
 [comment]: <> (  <h2 align="center">PAPER</h2>)
   <h3 align="center">
-  <a href="">Blog</a> 
+  <a href="https://www.notion.so/fulingair/Vector-1495a3630739805db92bf74030f307d4">Blog</a> 
   | <a href="https://github.com/BerensRWU/DenseMap">Original Github Page</a>
   </h3>
   <div align="justify">
@@ -17,6 +17,14 @@
   A grid size of 4 means a 9x9 neighbourhood is used and weighted depth information is calculated according to the distance of the neighbourhood.
   </div>
 
+
+<div align="center">
+  <img src="./color_dense_depth/微信截图_20241205135714.png" width="80%" />
+</div>
+
+<div align="center">
+  <img src="./color_dense_depth/微信截图_20241205135723.png" width="80%" />
+</div>
 
 
 <!-- 下面是初始化并创建github仓库 -->
